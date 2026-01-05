@@ -204,6 +204,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ needs.auto-tag.outputs.new_version }}
           files: |
             relatim-android.apk
             relatim-windows.zip
