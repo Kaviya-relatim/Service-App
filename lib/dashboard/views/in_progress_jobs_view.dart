@@ -9,44 +9,106 @@ class InProgressJobsView extends StatefulWidget {
 
 class _InProgressJobsViewState extends State<InProgressJobsView> {
   // Simulating the first item is expanded for "In Progress" demo
-  int? _expandedIndex = 0;
+  int? _expandedIndex;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       children: [
-        if (_expandedIndex == 0)
-          _buildExpandedProgressCard()
-        else
-          _buildCollapsedCard(
-            "2021 Toyota Camry",
-            "Full Synthetic Oil Change • In Progress",
-            Icons.directions_car,
-            onTap: () => setState(() => _expandedIndex = 0),
-          ),
-
-        const SizedBox(height: 16),
-
-        _buildCollapsedCard(
-          "2019 Toyota Camry",
-          "Brake Pad Replacement • Queued",
-          Icons.directions_car,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 1 ? null : 1),
+        _buildItem(
+          0,
+          "ABC-1234",
+          "2021 Toyota Camry",
+          "John Doe • Phone: 555-0123",
+          "Full Synthetic Oil Change • In Progress",
+          const [
+            {"title": "Synthetic Oil Change", "isDone": true},
+            {"title": "Tire Rotation", "isDone": true},
+            {"title": "Fluid Check", "isDone": false},
+          ],
+          "00",
+          "45",
+          "12",
+          "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200",
         ),
+
         const SizedBox(height: 16),
-        _buildCollapsedCard(
+
+        _buildItem(
+          1,
+          "XYZ-9876",
+          "2019 Toyota Camry",
+          "Sarah Connor • Phone: 555-0987",
+          "Brake Pad Replacement • Queued",
+          const [
+            {"title": "Brake Inspection", "isDone": false},
+            {"title": "Pad Replacement", "isDone": false},
+          ],
+          "00",
+          "00",
+          "00",
+          "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=200",
+        ),
+
+        const SizedBox(height: 16),
+
+        _buildItem(
+          2,
+          "LMN-4567",
           "2022 Honda Civic",
+          "Mike Ross • Phone: 555-0456",
           "Tire Rotation • Queued",
-          Icons.directions_car,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 2 ? null : 2),
+          const [
+            {"title": "Tire Rotation", "isDone": false},
+            {"title": "Alignment Check", "isDone": false},
+          ],
+          "00",
+          "00",
+          "00",
+          "https://images.unsplash.com/photo-1580273916550-e323be2ebcc9?auto=format&fit=crop&q=80&w=200",
           opacity: 0.6,
         ),
 
         const SizedBox(height: 100),
       ],
+    );
+  }
+
+  Widget _buildItem(
+    int index,
+    String plate,
+    String carName,
+    String ownerInfo,
+    String collapsedSubtitle,
+    List<Map<String, dynamic>> tasks,
+    String hours,
+    String minutes,
+    String seconds,
+    String imageUrl, {
+    double opacity = 1.0,
+  }) {
+    if (_expandedIndex == index) {
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildExpandedProgressCard(
+          plate,
+          carName,
+          ownerInfo,
+          tasks,
+          hours,
+          minutes,
+          seconds,
+          imageUrl,
+        ),
+      );
+    }
+    return _buildCollapsedCard(
+      carName,
+      collapsedSubtitle,
+      Icons.directions_car,
+      onTap: () => setState(() => _expandedIndex = index),
+      opacity: opacity,
     );
   }
 
@@ -125,7 +187,16 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
     );
   }
 
-  Widget _buildExpandedProgressCard() {
+  Widget _buildExpandedProgressCard(
+    String plate,
+    String carName,
+    String ownerInfo,
+    List<Map<String, dynamic>> tasks,
+    String hours,
+    String minutes,
+    String seconds,
+    String imageUrl,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1C2630),
@@ -152,10 +223,8 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
                 decoration: BoxDecoration(
                   color: Colors.grey[800],
                   borderRadius: BorderRadius.circular(32),
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200',
-                    ),
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -165,27 +234,27 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "ABC-1234",
-                      style: TextStyle(
+                    Text(
+                      plate,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      "2021 Toyota Camry",
-                      style: TextStyle(
+                    Text(
+                      carName,
+                      style: const TextStyle(
                         color: Color(0xFF9CA3AF),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      "Owner: John Doe",
-                      style: TextStyle(
+                    Text(
+                      ownerInfo,
+                      style: const TextStyle(
                         color: Color(0xFF6A7785),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -239,11 +308,11 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildTimeSegment("00", "HOURS"),
+                _buildTimeSegment(hours, "HOURS"),
                 Container(width: 1, height: 32, color: const Color(0xFF374151)),
-                _buildTimeSegment("45", "MIN"),
+                _buildTimeSegment(minutes, "MIN"),
                 Container(width: 1, height: 32, color: const Color(0xFF374151)),
-                _buildTimeSegment("12", "SEC", isActive: true),
+                _buildTimeSegment(seconds, "SEC", isActive: true),
               ],
             ),
           ),
@@ -259,9 +328,12 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
           ),
           const SizedBox(height: 12),
 
-          _buildTaskItem("Synthetic Oil Change", true),
-          const SizedBox(height: 12),
-          _buildTaskItem("Tire Rotation", true),
+          ...tasks.map(
+            (task) => Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildTaskItem(task['title'], task['isDone']),
+            ),
+          ),
 
           const SizedBox(height: 24),
 
@@ -348,11 +420,11 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.check_circle,
-            color: Colors.white,
+          Icon(
+            isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: isDone ? Colors.white : Colors.grey,
             size: 20,
-          ), // Using simpler icon
+          ),
           const SizedBox(width: 12),
           Text(
             task,
@@ -374,14 +446,9 @@ class _InProgressJobsViewState extends State<InProgressJobsView> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        // Using Column to mimic the vertical icon+text layout in design roughly or just Row
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 20,
-          ), // Icon size matches design roughly
+          Icon(icon, color: Colors.white, size: 20),
           Text(
             label,
             style: const TextStyle(

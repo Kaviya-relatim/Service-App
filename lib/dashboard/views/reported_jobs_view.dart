@@ -10,38 +10,88 @@ class ReportedJobsView extends StatefulWidget {
 class _ReportedJobsViewState extends State<ReportedJobsView> {
   // Simulating the second item is expanded (Reported Toyota RAV4)
   // In a real app index would be dynamic.
-  int? _expandedIndex = 1;
+  int? _expandedIndex;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       children: [
-        // Top "Collapsed" item example
-        _buildCollapsedCard(
+        _buildItem(
+          0,
           "2020 Ford F-150",
-          "Plate: K-9920 • Reported 08:30 AM",
+          "Plate: K-9920",
+          "Reported 08:30 AM",
           Icons.directions_car,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 0 ? null : 0),
+          "John Doe",
+          "Regular Customer",
+          "Engine overheating after 30 mins of driving. Coolant levels seem normal.",
+          "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
         ),
 
         const SizedBox(height: 16),
 
-        // Expanded "Reported" Item
-        // For demonstration, we assume index 1 is the Toyota from the design
-        if (_expandedIndex == 1)
-          _buildExpandedReportedCard()
-        else
-          _buildCollapsedCard(
-            "Toyota RAV4 Hybrid",
-            "Plate: J-8821 • 09:45 AM - Today",
-            Icons.electric_car, // hybrid
-            onTap: () => setState(() => _expandedIndex = 1),
-          ),
+        _buildItem(
+          1,
+          "Toyota RAV4 Hybrid",
+          "Plate: J-8821",
+          "09:45 AM - Today",
+          Icons.electric_car, // hybrid
+          "Sarah Jenkins",
+          "Regular Customer",
+          "Customer reports unusual noise coming from the front-left wheel well during braking.\nCheck engine light appeared this morning.",
+          "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200",
+        ),
+        const SizedBox(height: 16),
+
+        // Additional item
+        _buildItem(
+          2,
+          "2022 Honda Civic",
+          "Plate: L-1234",
+          "11:15 AM - Today",
+          Icons.directions_car,
+          "Mike Ross",
+          "New Customer",
+          "Brake squealing noise. Needs immediate inspection.",
+          "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=200",
+        ),
 
         const SizedBox(height: 100),
       ],
+    );
+  }
+
+  Widget _buildItem(
+    int index,
+    String title,
+    String plate,
+    String timeInfo,
+    IconData icon,
+    String customerName,
+    String customerType,
+    String issueDescription,
+    String imageUrl,
+  ) {
+    if (_expandedIndex == index) {
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildExpandedReportedCard(
+          title,
+          plate,
+          timeInfo,
+          customerName,
+          customerType,
+          issueDescription,
+          imageUrl,
+        ),
+      );
+    }
+    return _buildCollapsedCard(
+      title,
+      "$plate • $timeInfo",
+      icon,
+      onTap: () => setState(() => _expandedIndex = index),
     );
   }
 
@@ -105,7 +155,15 @@ class _ReportedJobsViewState extends State<ReportedJobsView> {
     );
   }
 
-  Widget _buildExpandedReportedCard() {
+  Widget _buildExpandedReportedCard(
+    String carTitle,
+    String plate,
+    String timeInfo,
+    String customerName,
+    String customerType,
+    String issueDescription,
+    String imageUrl,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -142,21 +200,21 @@ class _ReportedJobsViewState extends State<ReportedJobsView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Toyota RAV4 Hybrid",
-                          style: TextStyle(
+                          carTitle,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          "Plate: J-8821 • 09:45 AM - Today",
-                          style: TextStyle(
+                          "$plate • $timeInfo",
+                          style: const TextStyle(
                             color: Color(0xFF9DABB9),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -193,27 +251,25 @@ class _ReportedJobsViewState extends State<ReportedJobsView> {
                 // Customer Info
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=9',
-                      ), // Placeholder Sarah
+                      backgroundImage: NetworkImage(imageUrl),
                     ),
                     const SizedBox(width: 12),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Sarah Jenkins",
-                          style: TextStyle(
+                          customerName,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          "Regular Customer",
-                          style: TextStyle(
+                          customerType,
+                          style: const TextStyle(
                             color: Color(0xFF9DABB9),
                             fontSize: 12,
                           ),
@@ -269,9 +325,9 @@ class _ReportedJobsViewState extends State<ReportedJobsView> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        "Customer reports unusual noise coming from the front-left wheel well during braking.\nCheck engine light appeared this morning.",
-                        style: TextStyle(
+                      Text(
+                        issueDescription,
+                        style: const TextStyle(
                           color: Color(0xFFE5E7EB),
                           fontSize: 14,
                           height: 1.5,

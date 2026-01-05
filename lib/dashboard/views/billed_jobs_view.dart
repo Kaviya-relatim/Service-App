@@ -1,38 +1,187 @@
 import 'package:flutter/material.dart';
 
-class BilledJobsView extends StatelessWidget {
+class BilledJobsView extends StatefulWidget {
   const BilledJobsView({super.key});
+
+  @override
+  State<BilledJobsView> createState() => _BilledJobsViewState();
+}
+
+class _BilledJobsViewState extends State<BilledJobsView> {
+  int? _expandedIndex;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       children: [
-        _buildBilledCard(
-          carName: "Tesla Model 3",
-          ownerName: "John Doe",
-          time: "Today, 10:30 AM",
-          serviceType: "Oil Change",
-          price: "\$120.00",
-          carImage:
-              "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=200",
+        _buildItem(
+          0,
+          "Tesla Model 3",
+          "John Doe",
+          "Today, 10:30 AM",
+          "Oil Change",
+          "\$120.00",
+          "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 20),
-        _buildBilledCard(
-          carName: "Ford F-150",
-          ownerName: "Jane Smith",
-          time: "Yesterday, 4:15 PM",
-          serviceType: "Brake Inspection",
-          price: "\$450.50",
-          carImage:
-              "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
+        _buildItem(
+          1,
+          "Ford F-150",
+          "Jane Smith",
+          "Yesterday, 4:15 PM",
+          "Brake Inspection",
+          "\$450.50",
+          "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 100),
       ],
     );
   }
 
-  Widget _buildBilledCard({
+  Widget _buildItem(
+    int index,
+    String carName,
+    String ownerName,
+    String time,
+    String serviceType,
+    String price,
+    String carImage,
+  ) {
+    if (_expandedIndex == index) {
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildBilledExpandedCard(
+          carName: carName,
+          ownerName: ownerName,
+          time: time,
+          serviceType: serviceType,
+          price: price,
+          carImage: carImage,
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => setState(() => _expandedIndex = index),
+      child: _buildCollapsedCard(
+        carName: carName,
+        time: time,
+        price: price,
+        serviceType: serviceType,
+        carImage: carImage,
+      ),
+    );
+  }
+
+  Widget _buildCollapsedCard({
+    required String carName,
+    required String time,
+    required String price,
+    required String serviceType,
+    required String carImage,
+  }) {
+    return Container(
+      height: 86,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C2127),
+        borderRadius: BorderRadius.circular(43),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 13,
+            top: 13,
+            bottom: 13,
+            width: 56,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(28),
+                image: DecorationImage(
+                  image: NetworkImage(carImage),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 85,
+            top: 13,
+            right: 48,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        color: Color(0xFF137FEC),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        color: Colors.white24,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "BILLED",
+                      style: TextStyle(
+                        color: Color(0xFF94A3B8), // gray for billed
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  carName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "$serviceType • $price",
+                  style: const TextStyle(
+                    color: Color(0xFF9DABB9),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 24,
+            top: 0,
+            bottom: 0,
+            child: Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.grey[600],
+              size: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBilledExpandedCard({
     required String carName,
     required String ownerName,
     required String time,

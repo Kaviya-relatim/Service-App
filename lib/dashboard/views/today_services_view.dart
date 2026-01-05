@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 
-class TodayServicesView extends StatelessWidget {
+class TodayServicesView extends StatefulWidget {
   const TodayServicesView({super.key});
+
+  @override
+  State<TodayServicesView> createState() => _TodayServicesViewState();
+}
+
+class _TodayServicesViewState extends State<TodayServicesView> {
+  // Track expanded state
+  int? _expandedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -20,46 +28,95 @@ class TodayServicesView extends StatelessWidget {
             ),
           ),
         ),
-        _buildServiceCard(
-          time: "09:00 AM",
-          status: "Checked In",
-          carName: "2021 Ford F-150",
-          customerName: "John Doe",
-          serviceType: "Routine Maintenance",
-          statusColor:
-              Colors.green, // Kept for logic, but might style differently
+        _buildItem(
+          0,
+          "09:00 AM",
+          "CHECKED IN",
+          "2021 Ford F-150",
+          "John Doe",
+          "Routine Maintenance",
+          "Waiting for technician assignment",
+          Colors.green,
+          "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 12),
-        _buildServiceCard(
-          time: "09:30 AM",
-          status: "Pending",
-          carName: "2023 Toyota Camry",
-          customerName: "Sarah Smith",
-          serviceType: "Brake Inspection",
-          statusColor: Colors.orange,
+        _buildItem(
+          1,
+          "09:30 AM",
+          "PENDING",
+          "2023 Toyota Camry",
+          "Sarah Smith",
+          "Brake Inspection",
+          "Customer stated brakes feel spongy",
+          Colors.orange,
+          "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 12),
-        _buildServiceCard(
-          time: "10:15 AM",
-          status: "In Progress",
-          carName: "2020 BMW X5",
-          customerName: "Mike Ross",
-          serviceType: "Tire Rotation",
-          statusColor: Colors.blue,
+        _buildItem(
+          2,
+          "10:15 AM",
+          "IN PROGRESS",
+          "2020 BMW X5",
+          "Mike Ross",
+          "Tire Rotation",
+          "Technician: Alex M.",
+          Colors.blue,
+          "https://images.unsplash.com/photo-1556155092-490a1ba16284?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 100),
       ],
     );
   }
 
-  Widget _buildServiceCard({
-    required String time,
-    required String status,
-    required String carName,
-    required String customerName,
-    required String serviceType,
-    required Color statusColor,
-  }) {
+  Widget _buildItem(
+    int index,
+    String time,
+    String status,
+    String carName,
+    String customerName,
+    String serviceType,
+    String note,
+    Color statusColor,
+    String imageUrl,
+  ) {
+    if (_expandedIndex == index) {
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildExpandedCard(
+          time,
+          status,
+          carName,
+          customerName,
+          serviceType,
+          note,
+          statusColor,
+          imageUrl,
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => setState(() => _expandedIndex = index),
+      child: _buildCollapsedCard(
+        time,
+        status,
+        carName,
+        customerName,
+        serviceType,
+        statusColor,
+        imageUrl,
+      ),
+    );
+  }
+
+  Widget _buildCollapsedCard(
+    String time,
+    String status,
+    String carName,
+    String customerName,
+    String serviceType,
+    Color statusColor,
+    String imageUrl,
+  ) {
     return Container(
       height: 86,
       decoration: BoxDecoration(
@@ -81,10 +138,8 @@ class TodayServicesView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white10,
                 borderRadius: BorderRadius.circular(28),
-                image: const DecorationImage(
-                  image: NetworkImage(
-                    'https://images.unsplash.com/photo-1494905998402-395d579af9c5?auto=format&fit=crop&q=80&w=200',
-                  ),
+                image: DecorationImage(
+                  image: NetworkImage(imageUrl),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -178,6 +233,149 @@ class TodayServicesView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildExpandedCard(
+    String time,
+    String status,
+    String carName,
+    String customerName,
+    String serviceType,
+    String note,
+    Color statusColor,
+    String imageUrl,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C2630),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      carName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      customerName,
+                      style: const TextStyle(
+                        color: Color(0xFF9DABB9),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildDetailRow(Icons.access_time_filled, "TIME", time),
+          const SizedBox(height: 12),
+          _buildDetailRow(Icons.build_circle, "SERVICE", serviceType),
+          const SizedBox(height: 12),
+          _buildDetailRow(
+            Icons.info_outline,
+            "STATUS",
+            status,
+            color: statusColor,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111418),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.sticky_note_2_outlined,
+                  color: Color(0xFF64748B),
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    note,
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFF64748B), size: 16),
+        const SizedBox(width: 8),
+        Text(
+          "$label:",
+          style: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: TextStyle(
+            color: color ?? Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

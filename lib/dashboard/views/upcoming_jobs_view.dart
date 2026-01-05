@@ -16,8 +16,7 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       children: [
-        if (_expandedIndex ==
-            null) // Hide header when a card is expanded to focus
+        if (_expandedIndex == null)
           const Padding(
             padding: EdgeInsets.only(left: 4, bottom: 16),
             child: Text(
@@ -32,47 +31,65 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
           ),
 
         // List items
-        ...[
-          _buildItem(
-            0,
-            "09:00 AM",
-            "Regular Service",
-            "2023 Ford F-150",
-            "James Anderson",
-          ),
-          const SizedBox(height: 12),
-          _buildItem(
-            1,
-            "10:30 AM",
-            "Brake Check",
-            "2020 BMW X5",
-            "Sarah Miller",
-          ), // Expanded example in image
-          const SizedBox(height: 12),
-          _buildItem(
-            2,
-            "12:00 PM",
-            "Tire Rotation",
-            "2022 Tesla Model 3",
-            "Michael Chen",
-          ),
-          const SizedBox(height: 12),
-          _buildItem(
-            3,
-            "01:45 PM",
-            "Inspection",
-            "2019 Toyota Camry",
-            "Robert Fox",
-          ),
-          const SizedBox(height: 12),
-          _buildItem(
-            4,
-            "03:00 PM",
-            "Oil Change",
-            "2021 Mercedes C300",
-            "Emily Wilson",
-          ),
-        ],
+        _buildItem(
+          0,
+          "09:00 AM",
+          "Regular Service",
+          "2023 Ford F-150",
+          "James Anderson",
+          "Today, 09:00 AM - 10:30 AM",
+          "Pickup Required",
+          "No technician yet",
+          "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
+        ),
+        const SizedBox(height: 12),
+        _buildItem(
+          1,
+          "10:30 AM",
+          "Brake Check",
+          "2020 BMW X5",
+          "Sarah Miller",
+          "Today, 10:30 AM - 12:00 PM",
+          "Drop-off",
+          "Assigned to Mike",
+          "https://images.unsplash.com/photo-1556155092-490a1ba16284?auto=format&fit=crop&q=80&w=200",
+        ),
+        const SizedBox(height: 12),
+        _buildItem(
+          2,
+          "12:00 PM",
+          "Tire Rotation",
+          "2022 Tesla Model 3",
+          "Michael Chen",
+          "Today, 12:00 PM - 01:00 PM",
+          "Use Shuttle",
+          "No technician yet",
+          "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=200",
+        ),
+        const SizedBox(height: 12),
+        _buildItem(
+          3,
+          "01:45 PM",
+          "Inspection",
+          "2019 Toyota Camry",
+          "Robert Fox",
+          "Today, 01:45 PM - 02:30 PM",
+          "Waiting Area",
+          "Assigned to Sarah",
+          "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200",
+        ),
+        const SizedBox(height: 12),
+        _buildItem(
+          4,
+          "03:00 PM",
+          "Oil Change",
+          "2021 Mercedes C300",
+          "Emily Wilson",
+          "Today, 03:00 PM - 04:00 PM",
+          "Valet Service",
+          "No technician yet",
+          "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=200",
+        ),
 
         const SizedBox(height: 100),
       ],
@@ -85,30 +102,44 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
     String status,
     String carName,
     String customerName,
+    String appointmentTime,
+    String logistics,
+    String assignment,
+    String imageUrl,
   ) {
-    // If expanded, show the full detail card.
     if (_expandedIndex == index) {
-      return _buildExpandedCard(index);
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildExpandedCard(
+          index,
+          carName,
+          customerName,
+          appointmentTime,
+          logistics,
+          assignment,
+          status,
+          time,
+          imageUrl,
+        ),
+      );
     }
 
-    // Otherwise show the collapsed listing
     return GestureDetector(
       onTap: () {
         setState(() {
-          // Toggle expansion
           _expandedIndex = _expandedIndex == index ? null : index;
         });
       },
-      child: _buildCollapsedCard(time, status, carName, customerName),
+      child: _buildCollapsedCard(time, status, carName, customerName, imageUrl),
     );
   }
 
-  // The existing pill-shaped card
   Widget _buildCollapsedCard(
     String time,
     String status,
     String carName,
     String customerName,
+    String imageUrl,
   ) {
     return Container(
       height: 86,
@@ -130,10 +161,8 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
               decoration: BoxDecoration(
                 color: Colors.white10,
                 borderRadius: BorderRadius.circular(28),
-                image: const DecorationImage(
-                  image: NetworkImage(
-                    'https://images.unsplash.com/photo-1494905998402-395d579af9c5?auto=format&fit=crop&q=80&w=200',
-                  ),
+                image: DecorationImage(
+                  image: NetworkImage(imageUrl),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -213,16 +242,20 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
     );
   }
 
-  // The new detailed card view
-  Widget _buildExpandedCard(int index) {
-    // Hardcoded data for the detailed view specific to the request image
-    // In a real app, you'd pass the full data object.
-    const carTitle = "2023 Tesla Model 3";
-    const subTitle = "Sarah Jenkins • License: 8XCV992";
-
+  Widget _buildExpandedCard(
+    int index,
+    String carTitle,
+    String customerName,
+    String appointmentTime,
+    String logistics,
+    String assignment,
+    String status,
+    String time,
+    String imageUrl,
+  ) {
     return Column(
       children: [
-        // Small top card (Previous item summary-ish, but simplified per design)
+        // Small top card (Summary)
         Container(
           height: 74,
           margin: const EdgeInsets.only(bottom: 16),
@@ -242,33 +275,32 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF283039),
                     borderRadius: BorderRadius.circular(24),
+                    image: DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.directions_car,
-                    color: Colors.white,
-                    size: 24,
-                  ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 left: 81,
                 top: 14,
                 child: Text(
-                  "2019 Toyota Camry",
-                  style: TextStyle(
+                  carTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 left: 81,
                 top: 38,
                 child: Text(
-                  "11:00 AM • Standard Service",
-                  style: TextStyle(
+                  "$time • $status",
+                  style: const TextStyle(
                     color: Color(0xFF9DABB9),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -313,18 +345,18 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 carTitle,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                subTitle,
-                style: TextStyle(
+              Text(
+                customerName,
+                style: const TextStyle(
                   color: Color(0xFF9DABB9),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -338,7 +370,7 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
                 iconBg: const Color.fromRGBO(30, 58, 138, 0.2),
                 iconColor: const Color(0xFF3B82F6),
                 label: "APPOINTMENT TIME",
-                value: "Today, 09:30 AM - 11:00 AM",
+                value: appointmentTime,
               ),
               const SizedBox(height: 20),
 
@@ -348,7 +380,7 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
                 iconBg: const Color.fromRGBO(120, 53, 15, 0.2),
                 iconColor: const Color(0xFFF59E0B),
                 label: "LOGISTICS",
-                value: "Pickup Required",
+                value: logistics,
                 indicatorColor: const Color(0xFFF59E0B),
               ),
               const SizedBox(height: 20),
@@ -359,7 +391,7 @@ class _UpcomingJobsViewState extends State<UpcomingJobsView> {
                 iconBg: const Color(0xFF283039),
                 iconColor: Colors.white,
                 label: "ASSIGNMENT",
-                value: "No technician yet",
+                value: assignment,
               ),
               const SizedBox(height: 32),
 

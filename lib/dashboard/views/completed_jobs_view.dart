@@ -8,52 +8,108 @@ class CompletedJobsView extends StatefulWidget {
 }
 
 class _CompletedJobsViewState extends State<CompletedJobsView> {
-  // Simulating the first item is expanded (Tesla Model 3)
-  int? _expandedIndex = 0;
+  // Start with no item expanded
+  int? _expandedIndex;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       children: [
-        if (_expandedIndex == 0)
-          _buildExpandedCompletedCard()
-        else
-          _buildCollapsedCard(
-            "Tesla Model 3 • EV-8822",
-            "Full Service • Job #8822",
-            Icons.electric_car, // EV Icon
-            onTap: () => setState(() => _expandedIndex = 0),
-          ),
-
+        _buildItem(
+          0,
+          "Tesla Model 3 • EV-8822",
+          "Full Service • Job #8822",
+          Icons.electric_car,
+          "Tesla Model 3",
+          "Alice Freeman • 8XF-291",
+          "\$164.00",
+          [
+            {"title": "Synthetic Oil Change", "price": "\$89.00"},
+            {"title": "Tire Rotation", "price": "\$45.00"},
+            {"title": "Wiper Blade Replace", "price": "\$30.00"},
+          ],
+          "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=200",
+        ),
         const SizedBox(height: 16),
-
-        _buildCollapsedCard(
+        _buildItem(
+          1,
           "Toyota Camry • LN-4029",
           "Job #8823",
           Icons.directions_car,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 1 ? null : 1),
+          "Toyota Camry",
+          "John Doe • LN-4029",
+          "\$95.00",
+          [
+            {"title": "Oil Change", "price": "\$50.00"},
+            {"title": "Inspection", "price": "\$45.00"},
+          ],
+          "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 16),
-        _buildCollapsedCard(
+        _buildItem(
+          2,
           "Honda Civic • XP-9921",
           "Job #8824",
           Icons.directions_car,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 2 ? null : 2),
+          "Honda Civic",
+          "Jane Smith • XP-9921",
+          "\$135.00",
+          [
+            {"title": "General Inspection", "price": "\$85.00"},
+            {"title": "Air Filter Replace", "price": "\$50.00"},
+          ],
+          "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=200",
         ),
         const SizedBox(height: 16),
-        _buildCollapsedCard(
+        _buildItem(
+          3,
           "Ford F-150 • AB-1234",
           "Job #8825",
           Icons.local_shipping,
-          onTap: () =>
-              setState(() => _expandedIndex = _expandedIndex == 3 ? null : 3),
+          "Ford F-150",
+          "Bob Wilson • AB-1234",
+          "\$310.00",
+          [
+            {"title": "Transmission Fluid", "price": "\$120.00"},
+            {"title": "Tire Replacement (1)", "price": "\$190.00"},
+          ],
+          "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=200",
         ),
-
         const SizedBox(height: 100),
       ],
+    );
+  }
+
+  Widget _buildItem(
+    int index,
+    String collapsedTitle,
+    String collapsedSubtitle,
+    IconData icon,
+    String expandedTitle,
+    String expandedSubtitle,
+    String totalPrice,
+    List<Map<String, String>> invoices,
+    String imageUrl,
+  ) {
+    if (_expandedIndex == index) {
+      // Return expanded card wrapped in GestureDetector to handle toggle close
+      return GestureDetector(
+        onTap: () => setState(() => _expandedIndex = null),
+        child: _buildExpandedCompletedCard(
+          expandedTitle,
+          expandedSubtitle,
+          totalPrice,
+          invoices,
+          imageUrl,
+        ),
+      );
+    }
+    return _buildCollapsedCard(
+      collapsedTitle,
+      collapsedSubtitle,
+      icon,
+      onTap: () => setState(() => _expandedIndex = index),
     );
   }
 
@@ -89,10 +145,7 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
                 color: const Color.fromRGBO(19, 127, 236, 0.1),
                 borderRadius: BorderRadius.circular(32),
               ),
-              child: const Icon(
-                Icons.done_all,
-                color: Color(0xFF137FEC),
-              ), // Using checkmark icon for completion feel or keep original
+              child: const Icon(Icons.done_all, color: Color(0xFF137FEC)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -127,14 +180,6 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "John Doe", // Placeholder name logic from image
-                        style: TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 14,
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -154,7 +199,13 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
     );
   }
 
-  Widget _buildExpandedCompletedCard() {
+  Widget _buildExpandedCompletedCard(
+    String title,
+    String subtitle,
+    String totalPrice,
+    List<Map<String, String>> invoices,
+    String imageUrl,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1C2127),
@@ -214,44 +265,44 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
           // Header
           Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Tesla Model 3",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(Icons.person, color: Colors.white, size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        "Alice Freeman • 8XF-291",
-                        style: TextStyle(
-                          color: Color(0xFF9DABB9),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.person, color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            color: Color(0xFF9DABB9),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               Container(
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&q=80&w=200',
-                    ), // Tesla placeholder
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -264,9 +315,9 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
           const SizedBox(height: 16),
 
           // Invoice Items
-          _buildInvoiceItem("Synthetic Oil Change", "\$89.00"),
-          _buildInvoiceItem("Tire Rotation", "\$45.00"),
-          _buildInvoiceItem("Wiper Blade Replace", "\$30.00"),
+          ...invoices.map(
+            (item) => _buildInvoiceItem(item['title']!, item['price']!),
+          ),
 
           const SizedBox(height: 24),
 
@@ -282,8 +333,8 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       "Total Estimate",
                       style: TextStyle(
                         color: Color(0xFF9DABB9),
@@ -292,8 +343,8 @@ class _CompletedJobsViewState extends State<CompletedJobsView> {
                       ),
                     ),
                     Text(
-                      "\$164.00",
-                      style: TextStyle(
+                      totalPrice,
+                      style: const TextStyle(
                         color: Color(0xFF137FEC),
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
