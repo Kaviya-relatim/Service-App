@@ -148,7 +148,7 @@ jobs:
         run: flutter pub get
         
       - name: Build Web
-        # Updated base-href for repository 'Roomate'
+        # Updated base-href for repository 'service'
         run: flutter build web --release --base-href "/Roomate/"
         
       - name: Upload Web Build
