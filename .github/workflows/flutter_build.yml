@@ -149,7 +149,7 @@ jobs:
         
       - name: Build Web
         # Updated base-href for repository 'service'
-        run: flutter build web --release --base-href "/Roomate/"
+        run: flutter build web --release --base-href "/service/"
         
       - name: Upload Web Build
         uses: actions/upload-artifact@v4
@@ -185,44 +185,44 @@ jobs:
           # Zip Windows
           if [ -d "artifacts/windows-build" ]; then
             cd artifacts/windows-build
-            zip -r ../../roomate-windows.zip .
+            zip -r ../../service-windows.zip .
             cd ../..
           fi
           
           # Zip Linux
           if [ -d "artifacts/linux-build" ]; then
             cd artifacts/linux-build
-            zip -r ../../roomate-linux.zip .
+            zip -r ../../service-linux.zip .
             cd ../..
           fi
           
           # Zip macOS
           if [ -d "artifacts/macos-build" ]; then
             cd artifacts/macos-build
-            zip -r ../../roomate-macos.zip .
+            zip -r ../../service-macos.zip .
             cd ../..
           fi
           
           # Zip Web
           if [ -d "artifacts/web-build" ]; then
             cd artifacts/web-build
-            zip -r ../../roomate-web-offline.zip .
+            zip -r ../../service-web-offline.zip .
             cd ../..
           fi
           
           # Copy APK
           if [ -d "artifacts/app-release-apk" ]; then
-            cp artifacts/app-release-apk/app-release.apk ./roomate-android.apk
+            cp artifacts/app-release-apk/app-release.apk ./service-android.apk
           fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            roomate-android.apk
-            roomate-windows.zip
-            roomate-linux.zip
-            roomate-macos.zip
-            roomate-web-offline.zip
+            service-android.apk
+            service-windows.zip
+            service-linux.zip
+            service-macos.zip
+            service-web-offline.zip
           draft: false
           prerelease: false
