@@ -48,7 +48,10 @@ class _LandingPageState extends State<LandingPage> {
               bottom: _isDark ? 30 : 100,
               left: _isDark ? 50 : null,
               right: 20,
-              child: VoiceCommandBar(isDark: _isDark),
+              child: VoiceCommandBar(
+                isDark: _isDark,
+                onCommand: _handleVoiceCommand,
+              ),
             ),
 
             // Gradient overlay at bottom (Only for Dark Mode design)
@@ -184,5 +187,50 @@ class _LandingPageState extends State<LandingPage> {
         ],
       ),
     );
+  }
+
+  void _handleVoiceCommand(String command) {
+    command = command.toLowerCase();
+    String? newFilter;
+
+    if (command.contains("schedule") || command.contains("upcoming")) {
+      newFilter = "Scheduled";
+    } else if (command.contains("report")) {
+      newFilter = "Reported";
+    } else if (command.contains("progress") || command.contains("ongoing")) {
+      newFilter = "In Progress";
+    } else if (command.contains("complete") ||
+        command.contains("done") ||
+        command.contains("finish")) {
+      newFilter = "Completed";
+    } else if (command.contains("bill") || command.contains("invoice")) {
+      newFilter = "Billed";
+    } else if (command.contains("all") ||
+        command.contains("home") ||
+        command.contains("dashboard")) {
+      newFilter = "All";
+    }
+
+    if (newFilter != null) {
+      setState(() {
+        _activeFilter = newFilter!;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Navigating to $newFilter"),
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Command not recognized: $command"),
+          backgroundColor: Colors.orange,
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
