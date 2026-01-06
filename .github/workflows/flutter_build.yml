@@ -82,8 +82,8 @@
         
         - uses: actions/setup-java@v4
           with:
-            distribution: 'zulu'
-            java-version: '17'
+            distribution: 'temurin'
+            java-version: '25'
             
         - name: Cache Gradle packages
           uses: actions/cache@v4
@@ -331,3 +331,4 @@
               app-release-web-offline.zip
             draft: false
             prerelease: false
+
