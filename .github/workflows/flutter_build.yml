@@ -104,8 +104,22 @@
         - name: Clean Android build
           run: |
             cd android
+            if [ -f "./gradlew" ]; then
+              chmod +x ./gradlew
+              ./gradlew clean
+            else
+              echo "gradlew not found, skipping clean"
+            fi
+            cd ..
+            
+        - name: Ensure Gradle wrapper exists
+          run: |
+            cd android
+            if [ ! -f "./gradlew" ]; then
+              echo "Downloading Gradle wrapper..."
+              gradle wrapper --gradle-version 8.7
+            fi
             chmod +x ./gradlew
-            ./gradlew clean
             cd ..
             
         - name: Accept Android SDK licenses
@@ -171,7 +185,11 @@
         - name: Run Gradle Build with Debug Output
           run: |
             cd android
-            ./gradlew app:assembleRelease --debug --stacktrace
+            if [ -f "./gradlew" ]; then
+              ./gradlew app:assembleRelease --debug --stacktrace
+            else
+              echo "gradlew not found, skipping Gradle build"
+            fi
             cd ..
             
         - name: Build Android APK
@@ -183,6 +201,7 @@
           run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
           env:
             GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
+          continue-on-error: false
           
         - name: Verify APK exists
           run: |

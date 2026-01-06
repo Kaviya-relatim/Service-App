@@ -70,4 +70,8 @@ afterEvaluate {
 dependencies {
     // The Flutter Gradle Plugin automatically adds the Flutter embedding dependencies
     // No need to specify them manually
+    
+    // Add explicit dependencies for the Flutter embedding
+    // This ensures the MainActivity.kt can find the FlutterActivity class
+    implementation("io.flutter:flutter_embedding_release:1.0.0-4d9e56e694b656610ab873752b5fa9e9a0e4c0c8")
 }
