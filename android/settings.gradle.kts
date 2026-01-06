@@ -18,9 +18,17 @@ pluginManagement {
 }
 
 plugins {
+    id("com.android.application") version "8.6.0" apply false
+    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
+}
 
-    id("com.android.application") version "8.3.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
+    }
 }
 
 include(":app")

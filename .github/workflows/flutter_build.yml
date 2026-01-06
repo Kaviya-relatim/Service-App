@@ -98,7 +98,35 @@
         - uses: subosito/flutter-action@v2
           with:
             channel: 'stable'
+            flutter-version: '3.27.2'
             cache: true
+            
+        - name: Clean Android build
+          run: |
+            cd android
+            chmod +x ./gradlew
+            ./gradlew clean
+            cd ..
+            
+        - name: Accept Android SDK licenses
+          run: flutter doctor --android-licenses -y
+          
+        - name: Verify Flutter setup
+          run: flutter doctor
+          
+        - name: Setup Android SDK
+          run: |
+            echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+            
+        - name: Check Android Environment
+          run: |
+            echo "ANDROID_HOME: $ANDROID_HOME"
+            echo "Java version:"
+            java -version
+            echo "Flutter version:"
+            flutter --version
+            echo "Flutter doctor:"
+            flutter doctor -v
             
         - name: Configure Gradle for network reliability
           run: |
@@ -119,10 +147,53 @@
         - name: Get Dependencies
           run: flutter pub get
           
+        - name: Upgrade Dependencies
+          run: flutter pub upgrade --major-versions
+          
+        - name: Flutter Clean
+          run: flutter clean
+          
+        - name: Test Gradle Build
+          run: |
+            cd android
+            chmod +x ./gradlew
+            ./gradlew app:dependencies --configuration releaseRuntimeClasspath
+            cd ..
+            
+        - name: Build Debug APK first
+          run: flutter build apk --debug --android-skip-build-dependency-validation
+          continue-on-error: true
+          
+        - name: Check Android Manifest
+          run: |
+            cat android/app/src/main/AndroidManifest.xml || echo "AndroidManifest.xml not found"
+            
+        - name: Run Gradle Build with Debug Output
+          run: |
+            cd android
+            ./gradlew app:assembleRelease --debug --stacktrace
+            cd ..
+            
         - name: Build Android APK
-          run: flutter build apk --release
+          run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
           env:
             GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
+          
+        - name: Build Android APK
+          run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
+          env:
+            GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
+          
+        - name: Verify APK exists
+          run: |
+            if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+              echo "APK built successfully!"
+              ls -la build/app/outputs/flutter-apk/
+            else
+              echo "APK not found. Checking for build outputs..."
+              find build/app/outputs -type f -name "*.apk" || echo "No APK files found"
+              exit 1
+            fi
           
         - name: Upload APK
           uses: actions/upload-artifact@v4
