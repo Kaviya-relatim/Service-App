@@ -132,6 +132,11 @@
           run: |
             echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
             
+        - name: Create local.properties
+          run: |
+            echo "flutter.sdk=$FLUTTER_HOME" > android/local.properties
+            echo "sdk.dir=$ANDROID_HOME" >> android/local.properties
+            
         - name: Check Android Environment
           run: |
             echo "ANDROID_HOME: $ANDROID_HOME"
