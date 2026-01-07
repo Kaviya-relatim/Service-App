@@ -59,6 +59,17 @@ flutter {
     source = "../.."
 }
 
+// Derive the Flutter engine embedding version from the SDK so Kotlin can resolve FlutterActivity.
+val localProperties = java.util.Properties().apply {
+    val propsFile = project.rootDir.parentFile.resolve("local.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { load(it) }
+    }
+}
+val flutterSdkPath = localProperties.getProperty("flutter.sdk") ?: System.getenv("FLUTTER_ROOT")
+    ?: error("flutter.sdk not set in local.properties and FLUTTER_ROOT not present")
+val flutterEngineVersion = file(flutterSdkPath).resolve("bin/cache/engine.version").readText().trim()
+
 // Ensure the Flutter Gradle Plugin is properly configured
 afterEvaluate {
     if (project.plugins.hasPlugin("dev.flutter.flutter-gradle-plugin")) {
@@ -69,5 +80,6 @@ afterEvaluate {
 }
 
 dependencies {
-    // Flutter plugin wires required embedding dependencies automatically; nothing extra needed here.
+    // Ensure Flutter embedding is on the classpath for Kotlin compilation.
+    implementation("io.flutter:flutter_embedding_release:$flutterEngineVersion")
 }
