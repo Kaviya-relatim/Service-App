@@ -85,6 +85,13 @@
             distribution: 'temurin'
             java-version: '17'
             
+        - name: Pin Gradle wrapper to 8.7
+          run: |
+            cd android
+            chmod +x ./gradlew
+            ./gradlew wrapper --gradle-version 8.7 --distribution-type all
+            cd ..
+            
         - name: Cache Gradle packages
           uses: actions/cache@v4
           with:
@@ -127,16 +134,6 @@
             else
               echo "gradlew not found, skipping clean"
             fi
-            cd ..
-            
-        - name: Ensure Gradle wrapper exists
-          run: |
-            cd android
-            if [ ! -f "./gradlew" ]; then
-              echo "Downloading Gradle wrapper..."
-              gradle wrapper --gradle-version 8.7
-            fi
-            chmod +x ./gradlew
             cd ..
             
         - name: Accept Android SDK licenses
