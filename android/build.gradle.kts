@@ -1,3 +1,12 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Fallback repositories for better reliability
+        maven { url = uri("https://repo1.maven.org/maven2") }
+    }
+}
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")
@@ -10,19 +19,6 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        // Fallback central mirror
-        maven { url = uri("https://repo1.maven.org/maven2") }
-        // Flutter artifacts
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
-        // Community artifacts
-        maven { url = uri("https://jitpack.io") }
-    }
 }
 
 tasks.register<Delete>("clean") {
