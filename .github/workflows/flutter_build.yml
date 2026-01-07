@@ -30,6 +30,8 @@
         - name: Get latest tag
           id: get_latest_tag
           run: |
+            # Fetch all tags first
+            git fetch --tags
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
             echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
@@ -44,20 +46,40 @@
             MINOR=${PARTS[1]:-0}
             PATCH=${PARTS[2]:-0}
             
-            # Find next available version
-            while true; do
+            # Find next available version using existing tags
+            # Since we already fetched all tags with git fetch --tags, 
+            # git rev-parse will check both local and remote
+            MAX_ATTEMPTS=50
+            ATTEMPT=0
+            
+            while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
               PATCH=$((PATCH + 1))
               NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+              ATTEMPT=$((ATTEMPT + 1))
               
-              # Check if tag exists locally
+              # Check if tag exists (local or remote)
               if ! git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
                 break
               fi
             done
             
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "Error: Could not find available version after $MAX_ATTEMPTS attempts"
+              exit 1
+            fi
+            
             echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
             echo "New version: $NEW_VERSION"
 
+        - name: Update pubspec.yaml version
+          run: |
+            NEW_VERSION="${{ steps.calculate_version.outputs.new_version }}"
+            # Remove 'v' prefix for pubspec version
+            VERSION_NUM=${NEW_VERSION#v}
+            # Update pubspec.yaml version
+            sed -i "s/^version: .*/version: $VERSION_NUM+${VERSION_NUM//./}/" pubspec.yaml
+            echo "Updated pubspec.yaml to version: $VERSION_NUM+${VERSION_NUM//./}"
+            
         - name: Create and push tag
           run: |
             git config user.name "github-actions[bot]"
@@ -65,8 +87,19 @@
             
             NEW_VERSION="${{ steps.calculate_version.outputs.new_version }}"
             
+            # Commit version update
+            git add pubspec.yaml
+            if git diff-index --quiet HEAD --; then
+              echo "No changes to commit"
+            else
+              git commit -m "chore: update version to $NEW_VERSION"
+            fi
+            
+            # Create tag
             git tag -a "$NEW_VERSION" -m "Auto-generated tag: $NEW_VERSION"
-            git push origin "$NEW_VERSION"
+            
+            # Push everything in one command to reduce network calls
+            git push origin main "$NEW_VERSION"
             echo "Created tag: $NEW_VERSION"
 
     # -----------------------------------------------------------------------------
@@ -84,43 +117,7 @@
           with:
             distribution: 'temurin'
             java-version: '17'
-
-        - uses: subosito/flutter-action@v2
-          with:
-            channel: 'stable'
-            flutter-version: '3.27.2'
-            cache: true
-
-        - name: Create local.properties
-          run: |
-            SDK_DIR="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-            if [ -z "$SDK_DIR" ]; then
-              echo "Android SDK path not found. Set ANDROID_SDK_ROOT or ANDROID_HOME."
-              exit 1
-            fi
-
-            if [ -z "$FLUTTER_ROOT" ]; then
-              echo "FLUTTER_ROOT is not set; flutter-action should define it."
-              exit 1
-            fi
-
-            mkdir -p android
-            echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-            echo "sdk.dir=$SDK_DIR" >> android/local.properties
-
-        - name: Pin Gradle wrapper to 8.7
-          run: |
-            cd android
-            if [ ! -f "./gradlew" ]; then
-              echo "gradlew missing; downloading Gradle 8.7 to bootstrap wrapper"
-              curl -sSL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle-8.7-bin.zip
-              unzip -q /tmp/gradle-8.7-bin.zip -d /tmp/gradle-8.7
-              /tmp/gradle-8.7/gradle-8.7/bin/gradle wrapper --gradle-version 8.7 --distribution-type all
-            fi
-            chmod +x ./gradlew
-            ./gradlew wrapper --gradle-version 8.7 --distribution-type all
-            cd ..
-
+            
         - name: Cache Gradle packages
           uses: actions/cache@v4
           with:
@@ -131,36 +128,10 @@
             restore-keys: |
               ${{ runner.os }}-gradle-
             
-        - name: Clean Android build
-          run: |
-            cd android
-            if [ -f "./gradlew" ]; then
-              chmod +x ./gradlew
-              ./gradlew clean
-            else
-              echo "gradlew not found, skipping clean"
-            fi
-            cd ..
-            
-        - name: Accept Android SDK licenses
-          run: flutter doctor --android-licenses -y
-          
-        - name: Verify Flutter setup
-          run: flutter doctor
-          
-        - name: Setup Android SDK
-          run: |
-            echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-            
-        - name: Check Android Environment
-          run: |
-            echo "ANDROID_HOME: $ANDROID_HOME"
-            echo "Java version:"
-            java -version
-            echo "Flutter version:"
-            flutter --version
-            echo "Flutter doctor:"
-            flutter doctor -v
+        - uses: subosito/flutter-action@v2
+          with:
+            channel: 'stable'
+            cache: true
             
         - name: Configure Gradle for network reliability
           run: |
@@ -181,58 +152,10 @@
         - name: Get Dependencies
           run: flutter pub get
           
-        - name: Upgrade Dependencies
-          run: flutter pub upgrade --major-versions
-          
-        - name: Flutter Clean
-          run: flutter clean
-          
-        - name: Test Gradle Build
-          run: |
-            cd android
-            chmod +x ./gradlew
-            ./gradlew app:dependencies --configuration releaseRuntimeClasspath
-            cd ..
-            
-        - name: Build Debug APK first
-          run: flutter build apk --debug --android-skip-build-dependency-validation
-          continue-on-error: true
-          
-        - name: Check Android Manifest
-          run: |
-            cat android/app/src/main/AndroidManifest.xml || echo "AndroidManifest.xml not found"
-            
-        - name: Run Gradle Build with Debug Output
-          run: |
-            cd android
-            if [ -f "./gradlew" ]; then
-              ./gradlew app:assembleRelease --debug --stacktrace
-            else
-              echo "gradlew not found, skipping Gradle build"
-            fi
-            cd ..
-            
         - name: Build Android APK
-          run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
+          run: flutter build apk --release
           env:
             GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
-          
-        - name: Build Android APK
-          run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
-          env:
-            GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
-          continue-on-error: false
-          
-        - name: Verify APK exists
-          run: |
-            if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-              echo "APK built successfully!"
-              ls -la build/app/outputs/flutter-apk/
-            else
-              echo "APK not found. Checking for build outputs..."
-              find build/app/outputs -type f -name "*.apk" || echo "No APK files found"
-              exit 1
-            fi
           
         - name: Upload APK
           uses: actions/upload-artifact@v4
@@ -357,8 +280,8 @@
           run: flutter pub get
           
         - name: Build Web
-         
-          run: flutter build web --release --base-href "/Service-App/"
+          # Updated base-href for repository '18plus-pdf'
+          run: flutter build web --release --base-href "/18plus-pdf/"
           
         - name: Upload Web Build
           uses: actions/upload-artifact@v4
