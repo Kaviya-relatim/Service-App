@@ -112,8 +112,10 @@
           run: |
             cd android
             if [ ! -f "./gradlew" ]; then
-              echo "gradlew missing; bootstrapping wrapper with system Gradle"
-              gradle wrapper --gradle-version 8.7 --distribution-type all
+              echo "gradlew missing; downloading Gradle 8.7 to bootstrap wrapper"
+              curl -sSL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle-8.7-bin.zip
+              unzip -q /tmp/gradle-8.7-bin.zip -d /tmp/gradle-8.7
+              /tmp/gradle-8.7/gradle-8.7/bin/gradle wrapper --gradle-version 8.7 --distribution-type all
             fi
             chmod +x ./gradlew
             ./gradlew wrapper --gradle-version 8.7 --distribution-type all
