@@ -57,4 +57,6 @@ flutter {
 dependencies {
     // Flutter embedding - use compileOnly since the Flutter plugin manages runtime inclusion
     compileOnly(files("$flutterSdkPath/bin/cache/artifacts/engine/android-arm64-release/flutter.jar"))
+    // Add AndroidX lifecycle dependency for LifecycleOwner
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.8.4")
 }
