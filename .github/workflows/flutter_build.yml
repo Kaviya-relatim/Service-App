@@ -84,28 +84,7 @@
           with:
             distribution: 'temurin'
             java-version: '17'
-            
-        - name: Pin Gradle wrapper to 8.7
-          run: |
-            cd android
-            if [ ! -f "./gradlew" ]; then
-              echo "gradlew missing; bootstrapping wrapper with system Gradle"
-              gradle wrapper --gradle-version 8.7 --distribution-type all
-            fi
-            chmod +x ./gradlew
-            ./gradlew wrapper --gradle-version 8.7 --distribution-type all
-            cd ..
-            
-        - name: Cache Gradle packages
-          uses: actions/cache@v4
-          with:
-            path: |
-              ~/.gradle/caches
-              ~/.gradle/wrapper
-            key: ${{ runner.os }}-gradle-${{ hashFiles('**/android/*.gradle*', '**/android/app/*.gradle*', '**/android/gradle/wrapper/gradle-wrapper.properties') }}
-            restore-keys: |
-              ${{ runner.os }}-gradle-
-            
+
         - uses: subosito/flutter-action@v2
           with:
             channel: 'stable'
@@ -128,6 +107,27 @@
             mkdir -p android
             echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
             echo "sdk.dir=$SDK_DIR" >> android/local.properties
+
+        - name: Pin Gradle wrapper to 8.7
+          run: |
+            cd android
+            if [ ! -f "./gradlew" ]; then
+              echo "gradlew missing; bootstrapping wrapper with system Gradle"
+              gradle wrapper --gradle-version 8.7 --distribution-type all
+            fi
+            chmod +x ./gradlew
+            ./gradlew wrapper --gradle-version 8.7 --distribution-type all
+            cd ..
+
+        - name: Cache Gradle packages
+          uses: actions/cache@v4
+          with:
+            path: |
+              ~/.gradle/caches
+              ~/.gradle/wrapper
+            key: ${{ runner.os }}-gradle-${{ hashFiles('**/android/*.gradle*', '**/android/app/*.gradle*', '**/android/gradle/wrapper/gradle-wrapper.properties') }}
+            restore-keys: |
+              ${{ runner.os }}-gradle-
             
         - name: Clean Android build
           run: |
