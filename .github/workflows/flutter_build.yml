@@ -100,6 +100,23 @@
             channel: 'stable'
             flutter-version: '3.27.2'
             cache: true
+
+        - name: Create local.properties
+          run: |
+            SDK_DIR="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+            if [ -z "$SDK_DIR" ]; then
+              echo "Android SDK path not found. Set ANDROID_SDK_ROOT or ANDROID_HOME."
+              exit 1
+            fi
+
+            if [ -z "$FLUTTER_ROOT" ]; then
+              echo "FLUTTER_ROOT is not set; flutter-action should define it."
+              exit 1
+            fi
+
+            mkdir -p android
+            echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+            echo "sdk.dir=$SDK_DIR" >> android/local.properties
             
         - name: Clean Android build
           run: |
@@ -131,11 +148,6 @@
         - name: Setup Android SDK
           run: |
             echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-            
-        - name: Create local.properties
-          run: |
-            echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-            echo "sdk.dir=$ANDROID_HOME" >> android/local.properties
             
         - name: Check Android Environment
           run: |
