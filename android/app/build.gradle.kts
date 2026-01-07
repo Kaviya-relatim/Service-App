@@ -5,6 +5,18 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Get Flutter SDK path from local.properties or environment
+val flutterSdkPath: String = run {
+    val localProperties = java.util.Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { localProperties.load(it) }
+    }
+    localProperties.getProperty("flutter.sdk") 
+        ?: System.getenv("FLUTTER_ROOT") 
+        ?: throw GradleException("Flutter SDK not found. Define flutter.sdk in local.properties or set FLUTTER_ROOT environment variable.")
+}
+
 android {
     namespace = "com.example.relatim"
     compileSdk = flutter.compileSdkVersion
@@ -37,4 +49,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// Add Flutter embedding dependency explicitly to ensure it's available during compilation
+dependencies {
+    // Flutter embedding - use compileOnly since the Flutter plugin manages runtime inclusion
+    compileOnly(files("$flutterSdkPath/bin/cache/artifacts/engine/android-arm64-release/flutter.jar"))
 }
