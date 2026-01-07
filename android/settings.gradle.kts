@@ -38,3 +38,6 @@ dependencyResolutionManagement {
 }
 
 include(":app")
+
+// Load Flutter plugins (generates plugin includes for Android builds)
+apply(from = "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle")
