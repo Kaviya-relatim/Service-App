@@ -156,6 +156,16 @@
             echo "Created local.properties with flutter.sdk=$FLUTTER_ROOT"
             cat android/local.properties
 
+        - name: Download Flutter Android artifacts
+          run: flutter precache --android
+          
+        - name: Verify Flutter artifacts
+          run: |
+            echo "Flutter SDK: $FLUTTER_ROOT"
+            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/engine/" || echo "No engine directory"
+            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/engine/android-arm64-release/" 2>/dev/null || echo "No android-arm64-release directory"
+            find "$FLUTTER_ROOT/bin/cache" -name "flutter.jar" 2>/dev/null | head -5 || echo "No flutter.jar found"
+          
         - name: Get Dependencies
           run: flutter pub get
           
