@@ -149,6 +149,13 @@
             # Add fallback repositories to settings.gradle.kts
             sed -i '/gradlePluginPortal()/a\        maven { url = uri("https://jitpack.io") }\n        maven { url = uri("https://dl.google.com/dl/android/maven2") }' android/settings.gradle.kts
             
+        - name: Create local.properties
+          run: |
+            echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+            echo "sdk.dir=$ANDROID_HOME" >> android/local.properties
+            echo "Created local.properties with flutter.sdk=$FLUTTER_ROOT"
+            cat android/local.properties
+
         - name: Get Dependencies
           run: flutter pub get
           
