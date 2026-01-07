@@ -88,6 +88,10 @@
         - name: Pin Gradle wrapper to 8.7
           run: |
             cd android
+            if [ ! -f "./gradlew" ]; then
+              echo "gradlew missing; bootstrapping wrapper with system Gradle"
+              gradle wrapper --gradle-version 8.7 --distribution-type all
+            fi
             chmod +x ./gradlew
             ./gradlew wrapper --gradle-version 8.7 --distribution-type all
             cd ..
