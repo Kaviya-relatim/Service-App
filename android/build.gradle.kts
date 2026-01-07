@@ -2,10 +2,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Flutter embedding repository - critical for resolving FlutterActivity
-        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
-        // Fallback repositories for better reliability
-        maven { url = uri("https://repo1.maven.org/maven2") }
     }
 }
 

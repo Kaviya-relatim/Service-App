@@ -1,22 +1,8 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-}
-
-// Get Flutter SDK path from local.properties or environment
-val flutterSdkPath: String = run {
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { localProperties.load(it) }
-    }
-    localProperties.getProperty("flutter.sdk") 
-        ?: System.getenv("FLUTTER_ROOT") 
-        ?: throw GradleException("Flutter SDK not found. Define flutter.sdk in local.properties or set FLUTTER_ROOT environment variable.")
 }
 
 android {
@@ -34,7 +20,10 @@ android {
     }
 
     defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.relatim"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -43,6 +32,7 @@ android {
 
     buildTypes {
         release {
+            // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -51,12 +41,4 @@ android {
 
 flutter {
     source = "../.."
-}
-
-// Add Flutter embedding dependency explicitly to ensure it's available during compilation
-dependencies {
-    // Flutter embedding - use compileOnly since the Flutter plugin manages runtime inclusion
-    compileOnly(files("$flutterSdkPath/bin/cache/artifacts/engine/android-arm64-release/flutter.jar"))
-    // Add AndroidX lifecycle dependency for LifecycleOwner
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.8.4")
 }
