@@ -297,8 +297,8 @@
           run: flutter pub get
           
         - name: Build Web
-          # Updated base-href for repository '18plus-pdf'
-          run: flutter build web --release --base-href "/18plus-pdf/"
+  
+          run: flutter build web --release --base-href "/service app/"
           
         - name: Upload Web Build
           uses: actions/upload-artifact@v4
